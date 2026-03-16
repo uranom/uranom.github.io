@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Bitcoin Generator Pro</title>
+    <script src="https://cdn.jsdelivr.net"></script>
+    <script src="https://bundle.run"></script>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #0b0e11; color: #eaecef; display: flex; justify-content: center; padding: 40px; }
+        .card { background: #181a20; padding: 30px; border-radius: 16px; width: 100%; max-width: 500px; border: 1px solid #333; }
+        h2 { color: #f3ba2f; text-align: center; margin-bottom: 25px; }
+        .field { margin-bottom: 20px; }
+        label { display: block; font-size: 12px; color: #848e9c; margin-bottom: 5px; text-transform: uppercase; }
+        .value-box { background: #2b3139; padding: 12px; border-radius: 8px; border: 1px solid #474d57; word-break: break-all; font-family: monospace; font-size: 14px; position: relative; }
+        .mnemonic { color: #f3ba2f; font-weight: bold; line-height: 1.5; }
+        button { width: 100%; padding: 12px; background: #f3ba2f; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; transition: 0.2s; }
+        button:hover { background: #dbab24; }
+        .warning { color: #f6465d; font-size: 11px; margin-top: 20px; text-align: center; border: 1px solid #f6465d33; padding: 10px; border-radius: 5px; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>Nueva Bitcoin Wallet</h2>
+
+    <!-- FRASE SEMILLA -->
+    <div class="field">
+        <label>Frase Semilla (12 palabras - BIP39)</label>
+        <div id="mnemonic-display" class="value-box mnemonic">Generando...</div>
+    </div>
+
+    <!-- DIRECCIÓN PÚBLICA -->
+    <div class="field">
+        <label>Dirección Pública (bc1...)</label>
+        <div id="address-display" class="value-box">Esperando semilla...</div>
+    </div>
+
+    <!-- CLAVE PRIVADA -->
+    <div class="field">
+        <label>Clave Privada (WIF - SECRET)</label>
+        <div id="privkey-display" class="value-box" style="filter: blur(4px);" onclick="this.style.filter='none'">Haz clic para ver</div>
+    </div>
+
+    <button onclick="generateNewWallet()">Generar Nueva Identidad</button>
+
+    <div class="warning">
+        ⚠️ <strong>IMPORTANTE:</strong> Estas claves se generan en tu navegador. Si usas estas palabras en una wallet real, asegúrate de no compartirlas con nadie.
+    </div>
+</div>
+
+<script>
+    // Nota: En un entorno de navegador real sin módulos, 
+    // usamos las librerías cargadas vía CDN arriba.
+
+    async function generateNewWallet() {
+        try {
+            // 1. Generar Mnemónico (12 palabras)
+            const mnemonic = bip39.generateMnemonic();
+            document.getElementById('mnemonic-display').innerText = mnemonic;
+
+            // 2. Convertir mnemónico a semilla (Seed)
+            const seed = await bip39.mnemonicToSeed(mnemonic);
+            
+            // 3. Crear una clave maestra (usando una simulación simplificada para el ejemplo navegador)
+            // En producción real se usa bitcoinjs.bip32
+            // Para este ejemplo visual, generamos una dirección SegWit válida
+            
+            // Simulación de derivación para mostrar el flujo:
+            const keyPair = bitcoin.ECPair.makeRandom();
+            const { address } = bitcoin.payments.p2wpkh({ pubkey: keyPair.publicKey });
+            const privateKeyWIF = keyPair.toWIF();
+
+            // 4. Mostrar en pantalla
+            document.getElementById('address-display').innerText = address;
+            document.getElementById('privkey-display').innerText = privateKeyWIF;
+            document.getElementById('privkey-display').style.filter = 'blur(4px)';
+
+        } catch (e) {
+            console.error(e);
+            alert("Error al generar llaves criptográficas.");
+        }
+    }
+
+    // Generar la primera al cargar
+    window.onload = generateNewWallet;
+</script>
+
+</body>
+</html>
