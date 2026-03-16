@@ -2,64 +2,76 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Bitcoin Wallet Generator - Live</title>
-    <!-- Librerías compatibles con Navegador/GitHub -->
-    <script src="https://bundle.run"></script>
-    <script src="https://bundle.run"></script>
-    <script src="https://bundle.run"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bitcoin Wallet Generator - Fix</title>
+    
+    <!-- Librerías de alta disponibilidad -->
+    <script src="https://unpkg.com"></script>
+    <script src="https://unpkg.com"></script>
+
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #0b0e11; color: white; display: flex; justify-content: center; padding: 40px; }
-        .card { background: #181a20; padding: 30px; border-radius: 16px; width: 100%; max-width: 500px; border: 1px solid #333; text-align: center; }
-        .box { background: #2b3139; padding: 15px; border-radius: 8px; margin: 15px 0; word-break: break-all; font-family: monospace; border: 1px solid #474d57; color: #f3ba2f; }
-        label { font-size: 12px; color: #848e9c; text-transform: uppercase; display: block; margin-top: 10px; }
-        button { width: 100%; padding: 15px; background: #f3ba2f; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 16px; }
-        .warning { color: #f6465d; font-size: 12px; margin-top: 20px; border: 1px solid #f6465d33; padding: 10px; }
+        body { font-family: 'Inter', sans-serif; background: #0b0e11; color: #eaecef; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .card { background: #181a20; padding: 30px; border-radius: 16px; width: 90%; max-width: 450px; border: 1px solid #333; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        h2 { color: #f3ba2f; text-align: center; margin-bottom: 25px; font-size: 1.5rem; }
+        .label { font-size: 11px; color: #848e9c; text-transform: uppercase; margin-bottom: 8px; letter-spacing: 1px; }
+        .box { background: #2b3139; padding: 15px; border-radius: 8px; margin-bottom: 20px; word-break: break-all; font-family: 'Courier New', monospace; border: 1px solid #474d57; font-size: 14px; line-height: 1.4; }
+        .mnemonic { color: #f3ba2f; font-weight: bold; }
+        button { width: 100%; padding: 15px; background: #f3ba2f; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1rem; transition: 0.3s; color: #000; }
+        button:hover { background: #dbab24; transform: translateY(-2px); }
+        .blur { filter: blur(5px); cursor: pointer; transition: 0.3s; }
+        .blur:hover { filter: blur(2px); }
     </style>
 </head>
 <body>
 
 <div class="card">
-    <h2>Generador de Wallet Real</h2>
+    <h2>BTC Wallet Generator</h2>
     
-    <label>Frase Semilla (12 Palabras)</label>
-    <div id="seed" class="box">Haz clic abajo para generar</div>
+    <div class="label">Frase Semilla (12 Palabras)</div>
+    <div id="seed" class="box mnemonic">Esperando...</div>
 
-    <label>Dirección Bitcoin (SegWit)</label>
+    <div class="label">Dirección SegWit (Pública)</div>
     <div id="addr" class="box">-</div>
 
-    <label>Clave Privada (WIF)</label>
-    <div id="priv" class="box" style="filter: blur(5px); transition: 0.3s;" onclick="this.style.filter='none'">HIDDEN (Click to show)</div>
+    <div class="label">Clave Privada (WIF)</div>
+    <div id="priv" class="box blur" onclick="this.classList.toggle('blur')">Haz clic para revelar</div>
 
-    <button onclick="createWallet()">GENERAR NUEVA WALLET</button>
+    <button onclick="generate()">GENERAR WALLET</button>
 
-    <div class="warning">⚠️ No compartas estas llaves. Son reales y funcionales.</div>
+    <p style="font-size: 10px; color: #666; text-align: center; margin-top: 15px;">
+        Generado localmente en tu navegador.
+    </p>
 </div>
 
 <script>
-    // Configuración necesaria para que las librerías funcionen en el navegador
-    window.Buffer = window.buffer.Buffer;
-
-    function createWallet() {
+    // Función principal de generación
+    async function generate() {
         try {
-            // 1. Generar Mnemónico
+            // 1. Generar mnemónico aleatorio
             const mnemonic = bip39.generateMnemonic();
             
-            // 2. Crear par de llaves aleatorias (Format: SegWit)
-            const keyPair = bitcoinjsLib.ECPair.makeRandom();
-            const { address } = bitcoinjsLib.payments.p2wpkh({ pubkey: keyPair.publicKey });
+            // 2. Crear llaves (usando la librería cargada en el objeto global 'bitcoin')
+            // Nota: unpkg carga la librería como 'bitcoin' o 'bitcoinjs'
+            const lib = window.bitcoin || window.bitcoinjs;
+            
+            const keyPair = lib.ECPair.makeRandom();
+            const { address } = lib.payments.p2wpkh({ pubkey: keyPair.publicKey });
             const wif = keyPair.toWIF();
 
-            // 3. Mostrar en la interfaz
+            // 3. Actualizar Interfaz
             document.getElementById('seed').innerText = mnemonic;
             document.getElementById('addr').innerText = address;
             document.getElementById('priv').innerText = wif;
-            document.getElementById('priv').style.filter = 'blur(5px)';
+            document.getElementById('priv').classList.add('blur');
 
-        } catch (error) {
-            console.error(error);
-            alert("Error: Asegúrate de estar conectado a internet para cargar las librerías.");
+        } catch (e) {
+            console.error(e);
+            alert("Error de carga. Asegúrate de que GitHub Pages tenga acceso a internet.");
         }
     }
+
+    // Generar una al cargar la página
+    window.onload = generate;
 </script>
 
 </body>
