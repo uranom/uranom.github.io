@@ -1,60 +1,62 @@
 <!DOCTYPE html>
-<html lang="es" class="black">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel de Inversión Personalizado</title>
-
-    <!-- Estilos base (Debes descargarlos y subirlos a tu servidor para que funcionen) -->
-    <link rel="stylesheet" href="app.css">
-    <link rel="stylesheet" href="custom.css">
-
+    <title>Panel de Trading Personalizado</title>
     <style>
-        body { background-color: #1C1F2D; color: white; font-family: sans-serif; }
-        .loading-screen { display: flex; justify-content: center; align-items: center; height: 100vh; }
+        /* Estilos para imitar la interfaz oscura de trading */
+        body, html { 
+            margin: 0; padding: 0; height: 100%; width: 100%; 
+            background-color: #0b0e11; color: #eaeaeb; font-family: 'Trebuchet MS', sans-serif;
+            overflow: hidden;
+        }
+        #header-simple {
+            height: 50px; background: #181a20; display: flex; 
+            align-items: center; padding: 0 20px; border-bottom: 1px solid #2b2f36;
+        }
+        #trading-view-container {
+            height: calc(100% - 50px);
+            width: 100%;
+        }
+        .balance-box {
+            margin-left: auto; color: #00c087; font-weight: bold;
+        }
     </style>
 </head>
-<body class="loading">
-    <noscript>Se requiere JavaScript para ejecutar esta aplicación.</noscript>
-    
-    <!-- Este es el contenedor donde React dibuja la plataforma -->
-    <div id="root">
-        <div class="loading-screen">
-            <h2>Cargando interfaz de mercado...</h2>
-        </div>
+<body>
+
+    <!-- Cabecera limpia sin logos externos -->
+    <div id="header-simple">
+        <span>INTERFAZ DE MERCADO TIEMPO REAL</span>
+        <div class="balance-box">DEMO: $10,000.00</div>
     </div>
 
+    <!-- Contenedor de la Gráfica (Sustituye al 'root' bloqueado) -->
+    <div id="trading-view-container"></div>
+
+    <!-- Motor de Gráficas Profesional (Compatible con cualquier servidor/GitHub) -->
+    <script type="text/javascript" src="https://s3.tradingview.com"></script>
     <script type="text/javascript">
-        // Configuración limpiada de datos personales y servidores externos
-        window.settings = {
-            "liveBalance":"10000.00",
-            "demoBalance":"10000.00",
-            "isDemo":1,
-            "id":"USUARIO_LOCAL",
-            "nickname":"Trader_Pro",
-            "email":"usuario@servidor.com",
-            "country":"MX",
-            "currencyCode":"USD",
-            "currencySymbol":"$",
-            "lang":"es",
-            "timeOffset":"-21600"
-        };
+        new TradingView.widget({
+            "autosize": true,
+            "symbol": "FX:EURUSD", // Puedes cambiar el par aquí
+            "interval": "1",
+            "timezone": "Etc/UTC",
+            "theme": "dark",
+            "style": "1",
+            "locale": "es",
+            "toolbar_bg": "#181a20",
+            "enable_publishing": false,
+            "allow_symbol_change": true,
+            "container_id": "trading-view-container",
+            "hide_side_toolbar": false,
+            "studies": [
+                "RSI@tv-basicstudies",
+                "MASimple@tv-basicstudies"
+            ]
+        });
     </script>
 
-    <!-- Scripts del motor (Debes tener estos archivos en tu servidor) -->
-    <script src="vendor.js"></script>
-    <script src="app.js"></script>
-
-    <script type="text/javascript">
-        (function () {
-            var messages = {"day":"día","days2":"días","days5":"días"};
-            window.tJSON = window.tJSON || {};
-            for (var i in messages) {
-                if (messages.hasOwnProperty(i)) {
-                    window.tJSON[i] = messages[i];
-                }
-            }
-        })();
-    </script>
 </body>
 </html>
