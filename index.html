@@ -1,153 +1,41 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NeoBank Mobile</title>
-    <style>
-        :root {
-            --bg: #e0e5ec;
-            --shadow: #a3b1c6;
-            --light: #ffffff;
-            --primary: #4a90e2;
-            --text: #444;
-        }
-        body {
-            background-color: var(--bg);
-            font-family: 'Segoe UI', sans-serif;
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            color: var(--text);
-        }
-        /* Dashboard Container */
-        .app-container {
-            padding: 25px;
-            flex: 1;
-            overflow-y: auto;
-        }
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-        }
-        /* Tarjeta de Saldo */
-        .balance-card {
-            background: var(--bg);
-            padding: 30px;
-            border-radius: 20px;
-            box-shadow: 9px 9px 16px var(--shadow), -9px -9px 16px var(--light);
-            text-align: center;
-            margin-bottom: 35px;
-        }
-        .balance-card h2 { font-size: 0.9rem; opacity: 0.7; margin: 0; }
-        .balance-amount { font-size: 2.2rem; font-weight: bold; margin: 10px 0; color: var(--primary); }
+import java.util.Scanner
 
-        /* Botones de Acción */
-        .actions {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
-        .btn {
-            background: var(--bg);
-            border: none;
-            padding: 20px;
-            border-radius: 15px;
-            box-shadow: 5px 5px 10px var(--shadow), -5px -5px 10px var(--light);
-            font-weight: bold;
-            color: var(--text);
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        .btn:active {
-            box-shadow: inset 5px 5px 10px var(--shadow), inset -5px -5px 10px var(--light);
-            transform: scale(0.98);
-        }
-        .btn-send { color: #e74c3c; }
-        .btn-deposit { color: #2ecc71; }
-
-        /* Lista de Movimientos */
-        .history {
-            margin-top: 35px;
-            text-align: left;
-        }
-        .history h3 { font-size: 1rem; margin-bottom: 15px; }
-        .transaction {
-            background: var(--bg);
-            padding: 15px;
-            border-radius: 12px;
-            box-shadow: 3px 3px 6px var(--shadow), -3px -3px 6px var(--light);
-            margin-bottom: 12px;
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.9rem;
-        }
-    </style>
-</head>
-<body>
-
-    <div class="app-container">
-        <div class="header">
-            <span>Hola, <strong>Usuario</strong></span>
-            <div style="width:40px; height:40px; background:var(--bg); border-radius:50%; box-shadow: 4px 4px 8px var(--shadow);"></div>
-        </div>
-
-        <div class="balance-card">
-            <h2>Saldo Disponible</h2>
-            <div class="balance-amount" id="balanceDisplay">$2,450.00</div>
-            <small>Cuenta Principal •••• 8812</small>
-        </div>
-
-        <div class="actions">
-            <button class="btn btn-deposit" onclick="operacion('deposito')">📥 Depositar</button>
-            <button class="btn btn-send" onclick="operacion('retiro')">📤 Enviar</button>
-        </div>
-
-        <div class="history">
-            <h3>Movimientos Recientes</h3>
-            <div id="listaTransacciones">
-                <div class="transaction"><span>Pago Netflix</span><span style="color:#e74c3c">-$12.99</span></div>
-                <div class="transaction"><span>Depósito Nómina</span><span style="color:#2ecc71">+$1,200.00</span></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Script de Inspección Eruda -->
-    <script src="https://cdn.jsdelivr.net"></script>
-    <script>
-        eruda.init(); // Toca el engrane en pantalla para inspeccionar
-
-        let saldo = 2450.00;
-
-        function operacion(tipo) {
-            const monto = 100.00; // Monto fijo para la prueba
-            const display = document.getElementById('balanceDisplay');
-            const lista = document.getElementById('listaTransacciones');
-
-            console.log(`Iniciando ${tipo} de $${monto}...`);
-
-            if (tipo === 'deposito') {
-                saldo += monto;
-                agregarTransaccion("Depósito", `+$${monto}`, "#2ecc71");
-            } else {
-                saldo -= monto;
-                agregarTransaccion("Envío", `-$${monto}`, "#e74c3c");
+// Clase que representa nuestra "App de Banco"
+class NeoBank(var saldo: Double) {
+    
+    fun realizarOperacion(tipo: String, monto: Double) {
+        println("--- Iniciando inspección de $tipo ---")
+        
+        when (tipo.lowercase()) {
+            "deposito" -> {
+                saldo += monto
+                println("✅ Depósito exitoso de $$monto")
             }
-
-            // Actualizar interfaz con efecto
-            display.innerText = `$${saldo.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
-            console.log("Nuevo saldo en memoria:", saldo);
+            "retiro" -> {
+                if (monto <= saldo) {
+                    saldo -= monto
+                    println("💸 Retiro completado: $$monto")
+                } else {
+                    println("❌ Error: Saldo insuficiente para retirar $$monto")
+                }
+            }
+            else -> println("⚠️ Operación no reconocida")
         }
+        
+        // Aquí es donde inspeccionamos el valor final
+        println("💰 Saldo actual en memoria: $$saldo")
+        println("------------------------------------")
+    }
+}
 
-        function agregarTransaccion(nombre, cantidad, color) {
-            const div = document.createElement('div');
-            div.className = 'transaction';
-            div.innerHTML = `<span>${nombre}</span><span style="color:${color}">${cantidad}</span>`;
-            document.getElementById('listaTransacciones').prepend(div);
-        }
-    </script>
-</body>
-</html>
+fun main() {
+    // 1. Instanciamos la app con un saldo inicial
+    val miApp = NeoBank(2450.0)
+    
+    println("Simulación de Banco Moderna Iniciada")
+    
+    // 2. Probamos operaciones (Inspecciona la consola abajo)
+    miApp.realizarOperacion("deposito", 500.0)
+    miApp.realizarOperacion("retiro", 100.0)
+    miApp.realizarOperacion("retiro", 5000.0) // Prueba de error
+}
